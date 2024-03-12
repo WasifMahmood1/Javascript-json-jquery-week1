@@ -1,6 +1,8 @@
-<?php // line 1 added to enable color highlight
+<?php 
 
-session_start();
-unset($_SESSION['name']);
-unset($_SESSION['user_id']);
-header('Location: index.php');
+    session_start();
+    session_destroy();
+    header("Location: index.php");
+    return;
+
+?>

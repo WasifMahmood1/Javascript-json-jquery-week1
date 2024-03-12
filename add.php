@@ -1,69 +1,78 @@
 <?php
-session_start();
+    require "pdo.php";
+    session_start();
 
-if (!isset($_SESSION['name'])) {
-    die('Not logged in');
-}
+    if (!isset($_SESSION['name'])) {
+        die("ACCESS DENIED");
+    }
 
-require_once "pdo.php";
-
-if (isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['email'])
-    && isset($_POST['headline']) && isset($_POST['summary'])) {
-    if (strlen($_POST['first_name']) < 1 || strlen($_POST['last_name']) < 1 || strlen($_POST['email']) < 1 ||
-        strlen($_POST['headline']) < 1 || strlen($_POST['summary']) < 1) {
-        $_SESSION['error'] = 'All values are required';
-        header("Location: add.php");
-        return;
-    } else {
-        $stmt = $pdo->prepare('INSERT INTO Profile (user_id,first_name, last_name, email, headline, summary) VALUES (:user_id, :first_name, :last_name, :email, :headline,:summary)');
-        $stmt->execute(array(
-                ':user_id' => $_SESSION['user_id'],
-                ':first_name' => $_POST['first_name'],
-                ':last_name' => $_POST['last_name'],
-                ':email' => $_POST['email'],
-                ':headline' => $_POST['headline'],
-                ':summary' => $_POST['summary'])
-        );
-        $_SESSION['success'] = "Record added.";
+    if (isset($_POST['cancel'])) {
         header("Location: index.php");
         return;
     }
 
-}
-else{
-    $_SESSION['fail']="All values are required";
-}?>
+    if (isset($_POST['first_name']) && isset($_POST['last_name']) && isset($_POST['email']) && isset($_POST['headline']) && isset($_POST['summary'])  ) {
+        if (empty($_POST['first_name']) || empty($_POST['last_name']) || empty($_POST['email']) || empty($_POST['headline']) || empty($_POST['summary'])) {
+            $_SESSION['error'] = "All fields are required";
+            header("Location: add.php");
+            return;
+        }
+
+        $sql = "INSERT INTO profile (user_id, first_name, last_name, email, headline, summary) VALUES (:uid, :fn, :ln, :em, :he, :su)";
+
+        $statement = $pdo->prepare($sql);
+
+        $statement->execute(array(
+            ":uid" => $_SESSION['user_id'],
+            ":fn" => $_POST['first_name'],
+            ":ln" => $_POST['last_name'],
+            ":em" => $_POST['email'],
+            ":he" => $_POST['headline'],
+            ":su" => $_POST['summary']
+        ));
+
+        $_SESSION['success'] = "Profile added";
+        header("Location: index.php");
+        return;
+
+    }
+?>
+
 <!DOCTYPE html>
 <html>
-<head>
-    <?php require_once "bootstrap.php"; ?>
-    <title>Jared Best | Login Page</title>
-</head>
+
 <body>
-<div class="container">
-    <h1>Adding Profile for UMSI</h1>
-    <?php
-    if (isset($_SESSION['fail'])) {
-        echo('<p style="color: red;">' . htmlentities($_SESSION['fail']) . "</p>\n");
-        unset($_SESSION['fail']);
-    }
+
+    <h1>Adding Profile for <?php if (isset($_SESSION['name'])) {
+        echo $_SESSION['name']; 
+    } ?> </h1>
+
+    <?php 
+        if (isset($_SESSION['error'])) {
+            echo "<p style='color: red'>".$_SESSION['error']."</p>";
+            unset($_SESSION['error']);
+        }
     ?>
-    <form method="post">
-        <p>First Name:
-            <input type="text" name="first_name" size="60"/></p>
-        <p>Last Name:
-            <input type="text" name="last_name" size="60"/></p>
-        <p>Email:
-            <input type="text" name="email" size="30"/></p>
-        <p>Headline:<br/>
-            <input type="text" name="headline" size="80"/></p>
-        <p>Summary:<br/>
-            <textarea name="summary" rows="8" cols="80"></textarea>
+
+    <form method="POST">
         <p>
-            <input type="submit" value="Add">
-            <input type="submit" name="cancel" value="Cancel">
+            First Name: <input type="text" name="first_name" />
         </p>
+        <p>
+            Last Name: <input type="text" name="last_name" />
+        </p>
+        <p>
+            Email: <input type="text" name="email" />
+        </p>
+        <p>
+            Headline: <input type="text" name="headline" />
+        </p>
+        <p>
+            Summary: <textarea name="summary" rows="8" cols="80"></textarea>
+        </p>
+        <input type="submit" name="submit" value="Add" />
+        <input type="submit" name="cancel" value="Cancel" />
     </form>
-</div>
 </body>
+
 </html>

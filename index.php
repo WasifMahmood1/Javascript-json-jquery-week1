@@ -1,73 +1,75 @@
-<?php // Do not put any HTML above this line
-session_start();
-require_once "pdo.php";
-$stmt = $pdo->query("SELECT profile_id, first_name,last_name , headline from users join Profile on users.user_id = Profile.user_id");
-$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-?>
-
-
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Wasif Mahmood | Resume Registry</title>
-    <?php require_once "bootstrap.php"; ?>
+    <title>Welcome to Autos Database | Wasif Mahmood</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
 </head>
+
+<?php 
+    require "pdo.php";
+
+    session_start();
+
+?>
+
 <body>
-<div class="container">
-    <h2>Jared Best | Resume Registry</h2>
-    <?php
-    if (isset($_SESSION['name'])) {
-        echo '<p><a href="logout.php">Logout</a></p>';
-    }
-    ?>
-    <?php
-    if (isset($_SESSION['success'])) {
-        echo('<p style="color: green;">' . htmlentities($_SESSION['success']) . "</p>\n");
-        unset($_SESSION['success']);
-    }
-    ?>
+    <h1>Alan Dsilva's Resume Registry</h1>
 
-    <ul>
-
-        <?php
-        if (!isset($_SESSION['name'])) {
-            echo "<p><a href='login.php'>Please log in</a></p>";
+    <?php
+        if (isset($_SESSION['success'])) {
+            echo "<p style='color: green'>".$_SESSION['success']."</p>";
+            unset($_SESSION['success']);
         }
-        if (true) {
-            if (true) {
-                echo "<table border='1'>";
-                echo " <thead><tr>";
-                echo "<th>Name</th>";
-                echo " <th>Headline</th>";
-                if (isset($_SESSION['name'])) {
-                    echo("<th>Action</th>");
-                }
-                echo " </tr></thead>";
-                foreach ($rows as $row) {
-                    echo "<tr><td>";
-                    echo("<a href='view.php?profile_id=" . $row['profile_id'] . "'>" . $row['first_name'] . $row['last_name']  . "</a>");
-                    echo("</td><td>");
-                    echo($row['headline']);
-                    echo("</td>");
-                    if (isset($_SESSION['name'])) {
-                        echo("<td>");
-                        echo('<a href="edit.php?profile_id=' . $row['profile_id'] . '">Edit</a> / <a href="delete.php?profile_id=' . $row['profile_id'] . '">Delete</a>');
-                    }
-                    echo("</td></tr>\n");
-                }
-                echo "</table>";
-            } else {
-                echo 'No rows found';
+        if ( isset($_SESSION['name'])) {
+            echo "<a href='logout.php'>Logout</a><br />";
+           
+        } else {
+            echo "<a href='login.php'>Please log in</a>";
+        }
+
+        $statement = $pdo->query("SELECT * FROM profile");
+
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($row != false) {
+
+            $statement = $pdo->query("SELECT * FROM profile");
+            
+            echo "<table border='1'>
+            <tbody>
+            <tr> 
+            <th>Name</th>
+            <th>Headline</th>";
+
+            if (isset($_SESSION['name'])) {
+                echo "<th>Action</th>";
             }
+            
+            echo "</tr>";
+            while ( $row = $statement->fetch(PDO::FETCH_ASSOC)) {
+                echo "<tr>";
+                echo "<td>".$row['first_name']." ".$row['last_name']."</td>";
+                echo "<td>".$row['email']."</td>";
+                if (isset($_SESSION['name'])) {
+                    echo "<td>
+                        <a href='edit.php?profile_id=".$row['profile_id']."'>Edit </a>
+                        <a href='delete.php?profile_id=".$row['profile_id']."'>Delete</a>
+                    </td>";
+                }
+                echo "</tr>";
+            }
+            echo "</tbody></table>";
         }
-        echo '</li></ul>';
-        ?>
-        <p><a href="add.php">Add New Entry</a></p>
-        <p>
-            <b>Note:</b> Your implementation should retain data across multiple
-            logout/login sessions. This sample implementation clears all its
-            data periodically - which you should not do in your implementation.
-        </p>
-</div>
+        
+
+        if ( isset($_SESSION['name'])) {
+            echo "<a href='add.php'>Add New Entry</a>";
+        } 
+
+    ?>
 </body>
+
 </html>
